@@ -1,8 +1,10 @@
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Cookies from "js-cookie";
 import { Outlet } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import { useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { setUser } from "./store/auth.js";
 
 function App() {
@@ -10,7 +12,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
 
-  async function fetchUser() {   
+  const fetchUser = useCallback(async () => {   
     setIsLoading(true);
     const res = await fetch(`${process.env.REACT_APP_API_URL}/user`, {
       headers: {
@@ -23,21 +25,23 @@ function App() {
       dispatch(setUser(user));
     }
     setIsLoading(false);
-  }
+  }, [token, dispatch]);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   if (isLoading) {
     return <p>Loading...</p>;
   }
 
   return (
-    <>
-      <NavBar />
-      <Outlet />
-    </>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <>
+        <NavBar />
+        <Outlet />
+      </>
+    </LocalizationProvider>
   );
 }
 
